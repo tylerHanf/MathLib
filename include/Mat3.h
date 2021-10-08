@@ -16,6 +16,7 @@ public:
 	Mat3 GetInverse(void) const;
 	Mat3 GetTranspose(void) const;
 
+	float Determinant(void) const;
 	void Invert(void);
 	void Transpose(void);
 	// let quats handle this?
@@ -30,8 +31,15 @@ public:
 	Mat3& operator-=(const Mat3& other);
 	Mat3  operator*(const Mat3& other) const;
 	Mat3& operator*=(const Mat3& other);
+	Mat3  operator*(const float& other) const;
+	Mat3& operator*=(const float& other);
+	Mat3  operator/(const float& other) const;
+	Mat3& operator/=(const float& other);
 	Vec3& operator[](const int index);
 	Vec3  operator[](const int index) const;
 
 	Vec3 M[3];
+
+private:
+	Mat3 Adjoint(void);
 };

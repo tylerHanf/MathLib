@@ -119,6 +119,7 @@ Vec4& Vec4::operator*=(const float scale) {
 	vec[0] *= scale;
 	vec[1] *= scale;
 	vec[2] *= scale;
+	vec[3] *= scale;
 	return *this;
 }
 

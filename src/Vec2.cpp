@@ -80,8 +80,8 @@ Vec2& Vec2::operator-=(const Vec2& other) {
 
 Vec2 Vec2::operator*(const float scale) const {
 	Vec2 temp;
-	temp.vec[0] *= scale;
-	temp.vec[1] *= scale;
+	temp.vec[0] = vec[0] * scale;
+	temp.vec[1] = vec[1] * scale;
 	return temp;
 }
 
@@ -93,18 +93,14 @@ Vec2& Vec2::operator*=(const float scale) {
 
 Vec2 Vec2::operator/(const float scale) const {
 	Vec2 temp;
-	if (scale != 0.0f) {
-		temp.vec[0] /= scale;
-		temp.vec[1] /= scale;
-	}
+	temp.vec[0] = vec[0] / scale;
+	temp.vec[1] = vec[1] / scale;
 	return temp;
 }
 
 Vec2& Vec2::operator/=(const float scale) {
-	if (scale != 0.0f) {
-		vec[0] /= scale;
-		vec[1] /= scale;
-	}
+	vec[0] /= scale;
+	vec[1] /= scale;
 	return *this;
 }
 

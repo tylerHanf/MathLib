@@ -30,7 +30,7 @@ Vec3::Vec3(const Vec2& vec2) {
 Vec3::Vec3(const Vec4& vec4) {
 	vec[0] = vec4[0];
 	vec[1] = vec4[1];
-	vec[2] = 0.0f;
+	vec[2] = vec4[2];
 }
 
 void Vec3::Normalize() {
@@ -68,7 +68,7 @@ Vec3& Vec3::operator=(const Vec3& other) {
 Vec3 Vec3::operator+(const Vec3& other) const {
 	Vec3 temp;
 	temp.vec[0] = vec[0] + other.vec[0];
-	temp.vec[1] = vec[1] + other.vec[2];
+	temp.vec[1] = vec[1] + other.vec[1];
 	temp.vec[2] = vec[2] + other.vec[2];
 	return temp;
 }

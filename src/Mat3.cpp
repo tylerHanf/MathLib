@@ -1,4 +1,5 @@
 #include "Mat3.h"
+#include "Logger.h"
 
 Mat3::Mat3() {
 	M[0] = Vec3(1.0f, 0.0f, 0.0f);
@@ -45,6 +46,13 @@ Vec3 Mat3::Column(const int index) const {
 	return temp;
 }
 
+float Mat3::Determinant() const {
+	float detI = M[0][0] * ((M[1][1] * M[2][2]) - (M[1][2] * M[2][1]));
+	float detJ = M[0][1] * ((M[1][0] * M[2][2]) - (M[1][2] * M[2][0]));
+	float detK = M[0][2] * ((M[1][0] * M[2][1]) - (M[1][1] * M[2][0]));
+	return detI - detJ + detK;
+}
+
 void Mat3::Transpose() {
 	float temp;
 	temp = M[1][0];
@@ -60,12 +68,36 @@ void Mat3::Transpose() {
 	M[1][2] = temp;
 }
 
+Mat3 Mat3::Adjoint() {
+	Mat3 adj;
+	adj[0][0] = (M[1][1] * M[2][2]) - (M[1][2] * M[2][1]);
+	adj[0][1] = -1 * ((M[1][0] * M[2][2]) - (M[1][2] * M[2][0]));
+	adj[0][2] = (M[1][0] * M[2][1]) - (M[1][1] * M[2][0]);
+
+	adj[1][0] = -1 * ((M[0][1] * M[2][2]) - (M[0][2] * M[2][1]));
+	adj[1][1] = (M[0][0] * M[2][2]) - (M[0][2] * M[2][0]);
+	adj[1][2] = -1 * ((M[0][0] * M[2][1]) - (M[0][1] * M[2][0]));
+
+	adj[2][0] = (M[0][1] * M[1][2]) - (M[0][2] * M[1][1]);
+	adj[2][1] = -1 * ((M[0][0] * M[1][2]) - (M[0][2] * M[1][0]));
+	adj[2][2] = (M[0][0] * M[1][1]) - (M[0][1] * M[1][0]);
+	return adj;
+}
+
 void Mat3::Invert() {
-	Transpose();
+	float det = Determinant();
+	if (det == 0)
+		Logger::LogPrint("Mat3::Invert FAIL");
+	else {
+		*this = Adjoint();
+		*this /= det;
+	}
 }
 
 Mat3 Mat3::GetInverse() const {
-	return GetTranspose();
+	Mat3 temp(*this);
+	temp.Invert();
+	return temp;
 }
 
 Mat3 Mat3::GetTranspose() const {
@@ -149,6 +181,36 @@ Mat3& Mat3::operator*=(const Mat3& other) {
 	temp.M[2][1] = M[0][0] * other.M[0][1] + M[0][1] * other.M[1][1] + M[0][2] * other.M[2][1];
 	temp.M[2][2] = M[0][0] * other.M[0][2] + M[0][1] * other.M[1][2] + M[0][2] * other.M[2][2];
 	*this = temp;
+	return *this;
+}
+
+Mat3 Mat3::operator*(const float& scale) const {
+	Mat3 temp;
+	temp[0] = M[0] * scale;
+	temp[1] = M[1] * scale;
+	temp[2] = M[2] * scale;
+	return temp;
+}
+
+Mat3& Mat3::operator*=(const float& scale) {
+	M[0] *= scale;
+	M[1] *= scale;
+	M[2] *= scale;
+	return *this;
+}
+
+Mat3 Mat3::operator/(const float& scale) const {
+	Mat3 temp;
+	temp[0] = M[0] / scale;
+	temp[1] = M[1] / scale;
+	temp[2] = M[2] / scale;
+	return temp;
+}
+
+Mat3& Mat3::operator/=(const float& scale) {
+	M[0] /= scale;
+	M[1] /= scale;
+	M[2] /= scale;
 	return *this;
 }
 
