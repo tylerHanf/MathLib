@@ -1,6 +1,8 @@
 #pragma once
-#include "Mat4.h"
 #include "Vec3.h"
+#include "Vec4.h"
+
+class Mat4;
 
 class Quaternion {
 public:
@@ -12,14 +14,10 @@ public:
 
 	Quaternion Conjugate(void) const;
 	Quaternion Inverse(void) const;
-	Quaternion Cross(const Quaternion& other);
 	float      Dot(const Quaternion& other);
-	Quaternion Rotate(const Quaternion& p, const Vec3 axis, float theta);
-	Mat4       ToMat4(void) const;
-	Mat3       ToMat3(void) const;
-	float      Length(void);
-	float      Norm(void) const;
-	float      Norm2(void) const;
+	Vec3       Rotate(const Vec3& pos) const;
+	float      Length(void) const;
+	float      Length2(void) const;
 
 	static Quaternion Unit(const Quaternion& quat);
 	
@@ -30,6 +28,8 @@ public:
 
 	Quaternion  operator+(const Quaternion& other) const;
 	Quaternion& operator+=(const Quaternion& other);
+	float&      operator[](const int index);
+	float       operator[](const int index) const;
 
 	float Real(void) const;
 	Vec3  Imaginary(void) const;

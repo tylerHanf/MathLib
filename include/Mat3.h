@@ -1,5 +1,6 @@
 #pragma once
 #include "Vec3.h"
+#include "Quaternion.h"
 
 class Mat3 {
 public:
@@ -9,6 +10,7 @@ public:
 		 const float x2, const float y2, const float z2);
 	Mat3(Vec3& x, Vec3& y, Vec3& z);
 	Mat3(const Mat3& other);
+	Mat3(const Quaternion& q);
 
 	Vec3 Row(const int index) const;
 	Vec3 Column(const int index) const;
@@ -19,10 +21,7 @@ public:
 	float Determinant(void) const;
 	void Invert(void);
 	void Transpose(void);
-	// let quats handle this?
-	//void  Rotate(const float x, const float y, const float z);
-
-	static Mat3 ScaleMatrix(const float x, const float y, const float z);
+	static Mat3 ScaleMatrix(const Vec3& scale);
 
 	Mat3& operator=(const Mat3& other);
 	Mat3  operator+(const Mat3& other) const;
@@ -42,4 +41,12 @@ public:
 
 private:
 	Mat3 Adjoint(void);
+	void SetErrorMat(void);
 };
+
+inline float Mat3::Determinant() const {
+	float detI = M[0][0] * ((M[1][1] * M[2][2]) - (M[1][2] * M[2][1]));
+	float detJ = M[0][1] * ((M[1][0] * M[2][2]) - (M[1][2] * M[2][0]));
+	float detK = M[0][2] * ((M[1][0] * M[2][1]) - (M[1][1] * M[2][0]));
+	return detI - detJ + detK;
+}

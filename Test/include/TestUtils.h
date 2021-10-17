@@ -1,27 +1,17 @@
 #pragma once
 #include <string>
 #include <iostream>
+#include "Logger.h"
 
 void PrintAssertPassed(std::string functionName);
 void Assert(float test, float expected, std::string functionName);
 
 template <class T, class U, int N, int J>
 void PrintAssertFailedMat(T& matTest, U& matExpected, std::string functionName) {
-	std::cout << functionName << " Expected ( ";
-	for (int i = 0; i < N; ++i) { 
-		for (int j = 0; j < J; ++j) {
-			std::cout << matExpected[i][j] << "  ";
-		}
-		std::cout << "\n";
-	}
-	std::cout << " ), Got (";
-	for (int i = 0; i < N; ++i) { 
-		for (int j = 0; j < J; ++j) {
-			std::cout << matTest[i][j] << "  ";
-		}
-		std::cout << "\n";
-	}
-	std::cout << " )\n";
+	if (N == 3)
+		Logger::LogPrint("%s FAILED\nExpected: %m Got: %m", functionName.c_str(), matExpected, matTest);
+	else
+		Logger::LogPrint("%s FAILED\nExpected: %M Got: %M", functionName.c_str(), matExpected, matTest);
 }
 
 template <class T, class U, int N, int J>
@@ -34,6 +24,8 @@ void Assert(T& matTest, U& matExpected, std::string functionName) {
 				break;
 			}
 		}
+		if (!passed)
+			break;
 	}
 	if (passed) {
 		PrintAssertPassed(functionName);
@@ -45,11 +37,13 @@ void Assert(T& matTest, U& matExpected, std::string functionName) {
 
 template <class T, class U, int N>
 void PrintAssertFailedVec(T& vecTest, U& vecExpected, std::string functionName) {
-	std::cout << functionName << " Expected (";
-	for (int i = 0; i < N - 1; ++i) { std::cout << vecExpected[i] << ", "; }
-	std::cout << vecExpected[N - 1] << "), Got (";
-	for (int i = 0; i < N - 1; ++i) { std::cout << vecTest[i] << ", "; }
-	std::cout << vecTest[N - 1] << ") FAILED\n";
+	Logger::LogPrint("%s FAILED\n Expected:", functionName.c_str());
+	if (N == 2)
+		Logger::LogPrint("%2 Got: %2", vecExpected, vecTest);
+	else if (N == 3)
+		Logger::LogPrint("%3 Got: %3", vecExpected, vecTest);
+	else if (N == 4)
+		Logger::LogPrint("%4 Got: %4", vecExpected, vecTest);
 }
 
 template <class T, class U, int N>
