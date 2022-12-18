@@ -12,6 +12,8 @@ public:
 	Mat3(const Mat3& other);
 	Mat3(const Quaternion& q);
 
+	std::string to_string(void);
+
 	Vec3 Row(const int index) const;
 	Vec3 Column(const int index) const;
 
@@ -43,6 +45,17 @@ private:
 	Mat3 Adjoint(void);
 	void SetErrorMat(void);
 };
+
+inline std::string Mat3::to_string(void)
+{
+	std::string str;
+	str = "(";
+	str += M[0].to_string(false) + ",\n";
+	str += M[1].to_string(false) + ",\n";
+	str += M[2].to_string(false) + ")";
+
+	return str;
+}
 
 inline float Mat3::Determinant() const {
 	float detI = M[0][0] * ((M[1][1] * M[2][2]) - (M[1][2] * M[2][1]));

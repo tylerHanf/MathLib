@@ -19,6 +19,8 @@ public:
 	Mat4(const Vec3& pos);
 	Mat4(const Quaternion& q);
 
+	std::string to_string(void);
+
 	Vec4 Row(const int index);
 	Vec4 Column(const int index);
 
@@ -66,39 +68,52 @@ private:
 	void SetErrorMat(void);
 };
 
+
 // inline implementation
-inline Vec4 Mat4::Row(const int index) {
-	return Vec4(M[0][index], M[1][index], M[2][index], M[3][index]);
+inline std::string Mat4::to_string(void)
+{
+	std::string str;
+	str = "(";
+	str += M[0].to_string(false) + ",\n";
+	str += M[1].to_string(false) + ",\n";
+	str += M[2].to_string(false) + ",\n";
+	str += M[3].to_string(false) + ")";
+
+	return str;
 }
 
-inline Vec4 Mat4::Column(const int index) {
+inline Vec4 Mat4::Row(const int index) {
 	return M[index];
 }
 
+inline Vec4 Mat4::Column(const int index) {
+	return Vec4(M[0][index], M[1][index], M[2][index], M[3][index]);
+}
+
 inline void Mat4::Transpose() {
-	float temp = M[0][1];
-	M[0][1] = M[1][0];
-	M[1][0] = temp;
+	float temp = M[0].y;
+	M[0].y = M[1].x;
+	M[1].x = temp;
 
-	temp = M[0][2];
-	M[0][2] = M[2][0];
-	M[2][1] = temp;
+	temp = M[0].z;
+	M[0].z = M[2].x;
+	M[2].y = temp;
 
-	temp = M[0][3];
-	M[0][3] = M[3][0];
-	M[3][0] = temp;
+	temp = M[0].w;
+	M[0].w = M[3].x;
+	M[3].x = temp;
 
-	temp = M[1][2];
-	M[1][2] = M[2][1];
-	M[2][1] = temp;
+	temp = M[1].z;
+	M[1].z = M[2].y;
+	M[2].y = temp;
 
-	temp = M[1][3];
-	M[1][3] = M[3][1];
-	M[3][1] = temp;
+	temp = M[1].w;
+	M[1].w = M[3].y;
+	M[3].y = temp;
 
-	temp = M[2][3];
-	M[2][3] = M[3][2];
-	M[3][2] = temp;
+	temp = M[2].w;
+	M[2].w = M[3].z;
+	M[3].z = temp;
 }
 
 inline Mat4 Mat4::GetInverse() const {
@@ -115,15 +130,15 @@ inline Mat4 Mat4::GetTranspose() const {
 
 // Check
 inline void Mat4::Translate(const Vec3& pos) {
-	M[3][0] += pos[0];
-	M[3][1] += pos[1];
-	M[3][2] += pos[2];
+	M[3].x += pos.x;
+	M[3].y += pos.y;
+	M[3].z += pos.z;
 }
 
 inline void Mat4::Scale(const Vec3& scale) {
-	M[0] *= scale[0];
-	M[1] *= scale[1];
-	M[2] *= scale[2];
+	M[0] *= scale.x;
+	M[1] *= scale.y;
+	M[2] *= scale.z;
 }
 
 inline Mat4 Mat4::TranslateMatrix(const Vec3& val) {
@@ -132,9 +147,9 @@ inline Mat4 Mat4::TranslateMatrix(const Vec3& val) {
 
 inline Mat4 Mat4::ScaleMatrix(const Vec3& scale) {
 	Mat4 temp;
-	temp[0][0] = scale[0];
-	temp[1][1] = scale[1];
-	temp[2][2] = scale[2];
+	temp[0].x = scale.x;
+	temp[1].y = scale.y;
+	temp[2].z = scale.z;
 	return temp;
 }
 
