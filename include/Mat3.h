@@ -20,6 +20,9 @@ public:
 	Mat3 GetInverse(void) const;
 	Mat3 GetTranspose(void) const;
 
+	float* Ptr(void);
+	const float* ConstPtr(void) const;
+
 	float Determinant(void) const;
 	void Invert(void);
 	void Transpose(void);
@@ -62,4 +65,14 @@ inline float Mat3::Determinant() const {
 	float detJ = M[0][1] * ((M[1][0] * M[2][2]) - (M[1][2] * M[2][0]));
 	float detK = M[0][2] * ((M[1][0] * M[2][1]) - (M[1][1] * M[2][0]));
 	return detI - detJ + detK;
+}
+
+inline float* Mat3::Ptr(void)
+{
+	return &(M[0].x);
+}
+
+inline const float* Mat3::ConstPtr(void) const
+{
+	return &(M[0].x);
 }

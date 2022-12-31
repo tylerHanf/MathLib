@@ -33,6 +33,9 @@ public:
 	void Scale(const Vec3& pos);
 	float Determinant(void);
 
+	float* Ptr(void);
+	const float* ConstPtr(void) const;
+
 	static Mat4 TranslateMatrix(const Vec3& pos);
 	static Mat4 ScaleMatrix(const Vec3& scale);
 	static Mat4 Perspective(const float aspect, 
@@ -60,7 +63,7 @@ public:
 	Mat4& operator/=(const float& scale);
 
 	Vec4& operator[](const int index);
-	Vec4  operator[](const int index) const;
+	const Vec4&  operator[](const int index) const;
 
 	Vec4 M[4];
 
@@ -68,6 +71,15 @@ private:
 	void SetErrorMat(void);
 };
 
+inline float* Mat4::Ptr(void)
+{
+	return &(M[0].x);
+}
+
+inline const float* Mat4::ConstPtr(void) const
+{
+	return &(M[0].x);
+}
 
 // inline implementation
 inline std::string Mat4::to_string(void)
@@ -157,6 +169,6 @@ inline Vec4& Mat4::operator[](const int index) {
 	return M[index];
 }
 
-inline Vec4 Mat4::operator[](const int index) const {
+inline const Vec4& Mat4::operator[](const int index) const {
 	return M[index];
 }

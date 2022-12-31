@@ -38,7 +38,7 @@ public:
 	Vec3& operator/=(const float scale);
 
 	float& operator[](const int index);
-	float  operator[](const int index) const;
+	const float& operator[](const int index) const;
 
 	bool operator==(const Vec3& other) const;
 
@@ -149,7 +149,7 @@ inline float& Vec3::operator[](const int index) {
 	return z;
 }
 
-inline float Vec3::operator[](const int index) const {
+inline const float& Vec3::operator[](const int index) const {
 	if (index == 0)
 		return x;
 	if (index == 1)

@@ -39,7 +39,7 @@ public:
 	Vec2& operator/=(const float scale);
 
 	float& operator[](const int index);
-	float  operator[](const int index) const;
+	const float&  operator[](const int index) const;
 
 	bool operator==(const Vec2& other) const;
 
@@ -124,7 +124,7 @@ inline float& Vec2::operator[](const int index) {
 	return index ? y : x;
 }
 
-inline float Vec2::operator[](const int index) const {
+inline const float& Vec2::operator[](const int index) const {
 	return index ? y : x;
 }
 
