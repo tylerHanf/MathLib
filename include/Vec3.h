@@ -16,6 +16,8 @@ public:
 
 	std::string to_string(bool brackets=true);
 
+	bool IsLeftOf(const Vec3& other) const;
+
 	float Length(void) const;
 	void  Normalize(void);
 	float Dot(const Vec3& other) const;
@@ -64,6 +66,11 @@ inline float Vec3::Length() const {
 
 inline float Vec3::Dot(const Vec3& other) const {
 	return x * other.x + y * other.y + z * other.z;
+}
+
+inline bool Vec3::IsLeftOf(const Vec3& other) const
+{
+	return Cross(other).y > 0;
 }
 
 inline Vec3& Vec3::operator=(const Vec3& other) {
@@ -156,7 +163,9 @@ inline const float& Vec3::operator[](const int index) const {
 		return y;
 	return z;
 }
+
 inline bool Vec3::operator==(const Vec3& other) const
 {
 	return (x == other.x) && (y == other.y) && (z == other.z);
 }
+
