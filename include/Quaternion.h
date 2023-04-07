@@ -21,6 +21,7 @@ public:
 	Vec3       Rotate(const Vec3& pos) const;
 	float      Length(void) const;
 	float      Length2(void) const;
+	void       Normalize(void);
 
 	static Quaternion Unit(const Quaternion& quat);
 	
@@ -52,6 +53,11 @@ inline std::string Quaternion::to_string(void)
 		         std::to_string(x) + ", " +
 		         std::to_string(y) + ", " +
 		         std::to_string(z) + ")";
+}
+
+inline void Quaternion::Normalize(void)
+{
+	*this *= (1 / Length());
 }
 
 inline Quaternion Quaternion::Unit(const Quaternion& quat) {

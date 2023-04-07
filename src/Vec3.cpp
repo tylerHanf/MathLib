@@ -1,6 +1,7 @@
 #include "Vec2.h"
 #include "Vec3.h"
 #include "Vec4.h"
+#include "Mat4.h"
 #include <math.h>
 
 Vec3::Vec3() {
@@ -31,6 +32,11 @@ Vec3::Vec3(const Vec4& vec4) {
 	x = vec4.x;
 	y = vec4.y;
 	z = vec4.z;
+}
+
+Vec3::Vec3(const Mat4& mat4)
+{
+	*this = mat4[3];
 }
 
 void Vec3::Normalize() {

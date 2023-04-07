@@ -5,6 +5,7 @@
 
 class Vec2;
 class Vec4;
+class Mat4;
 
 class Vec3 {
 public:
@@ -13,6 +14,7 @@ public:
 	Vec3(const Vec3& other);
 	Vec3(const Vec2& vec2);
 	Vec3(const Vec4& vec4);
+	Vec3(const Mat4& mat4);
 
 	std::string to_string(bool brackets=true);
 
