@@ -212,7 +212,7 @@ void Mat4::Invert() {
 	float determinant = s0 * c5 - s1 * c4 + s2 * c3 + s3 * c2 - s4 * c1 + s5 * c0;
 
 	if (determinant == 0) {
-		Logger::LogPrint("Mat4::Invert Invalid Invert -> Determinant is 0");
+		Logger::Log("Mat4::Invert Invalid Invert -> Determinant is 0");
 		SetErrorMat();
 	}
 	else {

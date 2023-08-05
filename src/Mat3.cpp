@@ -92,7 +92,7 @@ Mat3 Mat3::Adjoint() {
 void Mat3::Invert() {
 	float det = Determinant();
 	if (det == 0) {
-		Logger::LogPrint("Mat3::Invert Invalid Invert -> Determinant is 0");
+		Logger::Log("Mat3::Invert Invalid Invert -> Determinant is 0");
 		SetErrorMat();
 	}
 	else {
