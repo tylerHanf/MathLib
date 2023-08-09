@@ -36,7 +36,7 @@ Vec3::Vec3(const Vec4& vec4) {
 
 Vec3::Vec3(const Mat4& mat4)
 {
-	*this = mat4[3];
+	// *this = mat4[3];
 }
 
 void Vec3::Normalize() {

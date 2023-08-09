@@ -4,6 +4,7 @@
 #include "Vec4.h"
 #include "Vec3.h"
 #include "Quaternion.h"
+#include <immintrin.h>
 
 // Defs
 class Mat4 {
@@ -62,9 +63,13 @@ public:
 	Mat4  operator/(const float& scale) const;
 	Mat4& operator/=(const float& scale);
 
-	Vec4& operator[](const int index);
-	const Vec4&  operator[](const int index) const;
+	Vec4 operator[](const int index);
+	// const Vec4&  operator[](const int index) const;
 
+	union {
+		float m[4][4];
+		__m128 mv[4];
+	};
 	Vec4 M[4];
 
 private:
@@ -73,12 +78,12 @@ private:
 
 inline float* Mat4::Ptr(void)
 {
-	return &(M[0].x);
+	return &(m[0][0]);
 }
 
 inline const float* Mat4::ConstPtr(void) const
 {
-	return &(M[0].x);
+	return &(m[0][0]);
 }
 
 // inline implementation
@@ -86,46 +91,29 @@ inline std::string Mat4::to_string(void)
 {
 	std::string str;
 	str = "(";
-	str += M[0].to_string(false) + ",\n";
-	str += M[1].to_string(false) + ",\n";
-	str += M[2].to_string(false) + ",\n";
-	str += M[3].to_string(false) + ")";
+	str += std::to_string(m[0][0]) + ", " + std::to_string(m[0][1]) + ", " + std::to_string(m[0][2]) + ", " + std::to_string(m[0][3]) + ",\n";
+	str += std::to_string(m[1][0]) + ", " + std::to_string(m[1][1]) + ", " + std::to_string(m[1][2]) + ", " + std::to_string(m[1][3]) + ",\n";
+	str += std::to_string(m[2][0]) + ", " + std::to_string(m[2][1]) + ", " + std::to_string(m[2][2]) + ", " + std::to_string(m[2][3]) + ",\n";
+	str += std::to_string(m[3][0]) + ", " + std::to_string(m[3][1]) + ", " + std::to_string(m[3][2]) + ", " + std::to_string(m[3][3]) + ")";
 
 	return str;
 }
 
 inline Vec4 Mat4::Row(const int index) {
-	return M[index];
+	return { m[index][0], m[index][1], m[index][2], m[index][3] };
 }
 
 inline Vec4 Mat4::Column(const int index) {
-	return Vec4(M[0][index], M[1][index], M[2][index], M[3][index]);
+	return {m[0][index], m[1][index], m[2][index], m[3][index]};
 }
 
 inline void Mat4::Transpose() {
-	float temp = M[0].y;
-	M[0].y = M[1].x;
-	M[1].x = temp;
+	mv[0] = _mm_load_ps((float const*)&m[0]);
+	mv[1] = _mm_load_ps((float const*)&m[1][0]);
+	mv[2] = _mm_load_ps((float const*)&m[2][0]);
+	mv[3] = _mm_load_ps((float const*)&m[3][0]);
 
-	temp = M[0].z;
-	M[0].z = M[2].x;
-	M[2].y = temp;
-
-	temp = M[0].w;
-	M[0].w = M[3].x;
-	M[3].x = temp;
-
-	temp = M[1].z;
-	M[1].z = M[2].y;
-	M[2].y = temp;
-
-	temp = M[1].w;
-	M[1].w = M[3].y;
-	M[3].y = temp;
-
-	temp = M[2].w;
-	M[2].w = M[3].z;
-	M[3].z = temp;
+	_MM_TRANSPOSE4_PS(mv[0], mv[1], mv[2], mv[3]);
 }
 
 inline Mat4 Mat4::GetInverse() const {
@@ -142,15 +130,29 @@ inline Mat4 Mat4::GetTranspose() const {
 
 // Check
 inline void Mat4::Translate(const Vec3& pos) {
-	M[3].x += pos.x;
-	M[3].y += pos.y;
-	M[3].z += pos.z;
+	/*
+	m[3][0] += pos[0];
+	m[3][1] += pos[1];
+	m[3][2] += pos[2];
+	*/
+	/*
+	mv[3] = _mm_load_ps((float const*)&m[3][0]);
+	_mm_add_ps()
+	*/
 }
 
 inline void Mat4::Scale(const Vec3& scale) {
-	M[0] *= scale.x;
-	M[1] *= scale.y;
-	M[2] *= scale.z;
+	__m128 scaleX = _mm_set_ps1(scale.v[0]);
+	__m128 scaleY = _mm_set_ps1(scale.v[1]);
+	__m128 scaleZ = _mm_set_ps1(scale.v[2]);
+
+	mv[0] = _mm_load_ps((float const*)&m[0][0]);
+	mv[1] = _mm_load_ps((float const*)&m[1][0]);
+	mv[2] = _mm_load_ps((float const*)&m[2][0]);
+
+	mv[0] = _mm_mul_ps(mv[0], scaleX);
+	mv[1] = _mm_mul_ps(mv[1], scaleY);
+	mv[2] = _mm_mul_ps(mv[2], scaleZ);
 }
 
 inline Mat4 Mat4::TranslateMatrix(const Vec3& val) {
@@ -159,16 +161,12 @@ inline Mat4 Mat4::TranslateMatrix(const Vec3& val) {
 
 inline Mat4 Mat4::ScaleMatrix(const Vec3& scale) {
 	Mat4 temp;
-	temp[0].x = scale.x;
-	temp[1].y = scale.y;
-	temp[2].z = scale.z;
+	temp.m[0][0] = scale.v[0];
+	temp.m[1][1] = scale.v[1];
+	temp.m[2][2] = scale.v[2];
 	return temp;
 }
 
-inline Vec4& Mat4::operator[](const int index) {
-	return M[index];
-}
-
-inline const Vec4& Mat4::operator[](const int index) const {
-	return M[index];
+inline Vec4 Mat4::operator[](const int index) {
+	return Vec4(m[index][0], m[index][1], m[index][2], m[index][3]);
 }

@@ -12,8 +12,10 @@ Vec2::Vec2() {
 }
 
 Vec2::Vec2(const float x, const float y) {
-	this->x = x;
-	this->y = y;
+	// this->x = x;
+	// this->y = y;
+	v[0] = x;
+	v[1] = y;
 }
 
 Vec2::Vec2(const Vec2& other) {

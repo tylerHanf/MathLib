@@ -12,14 +12,33 @@ Mat4::Mat4()
 }
 
 Mat4::Mat4(const float x0, const float x1, const float x2, const float w0,
-	       const float y0, const float y1, const float y2, const float w1,
-	       const float z0, const float z1, const float z2, const float w2,
-	       const float px, const float py, const float pz, const float w3)
+	const float y0, const float y1, const float y2, const float w1,
+	const float z0, const float z1, const float z2, const float w2,
+	const float px, const float py, const float pz, const float w3)
 {
+	/*
 	M[0] = Vec4(x0, x1, x2, w0);
 	M[1] = Vec4(y0, y1, y2, w1);
 	M[2] = Vec4(z0, z1, z2, w2);
 	M[3] = Vec4(px, py, pz, w3);
+	*/
+	m[0][0] = x0;
+	m[0][1] = x1; 
+	m[0][2] = x2; 
+	m[0][3] = w0;
+	m[1][0] = y0;
+	m[1][1] = y1; 
+	m[1][2] = y2; 
+	m[1][3] = w1;
+	m[2][0] = z0;
+	m[2][1] = z1; 
+	m[2][2] = z2; 
+	m[2][3] = w2;
+	m[3][0] = px;
+	m[3][1] = py; 
+	m[3][2] = pz; 
+	m[3][3] = w3;
+
 }
 
 Mat4::Mat4(const Mat4& other) {
@@ -178,6 +197,7 @@ float Mat4::Determinant() {
 // Uses Laplace Expansion Theorem: 
 // https://www.geometrictools.com/Documentation/LaplaceExpansionTheorem.pdf
 void Mat4::Invert() {
+	/*
 	float m00 = M[0].x;
 	float m01 = M[0].y;
 	float m02 = M[0].z;
@@ -239,6 +259,7 @@ void Mat4::Invert() {
 
 		*this = adj / determinant;
 	}
+	*/
 }
 
 Mat4& Mat4::operator=(const Mat4& other) {
@@ -292,6 +313,9 @@ void Mat4::SetErrorMat() {
 }
 
 Mat4 Mat4::operator*(const Mat4& other) const {
+
+	Mat4 temp;
+	/*
 	float m00 = M[0].x;
 	float m01 = M[0].y;
 	float m02 = M[0].z;
@@ -326,7 +350,6 @@ Mat4 Mat4::operator*(const Mat4& other) const {
 	float o32 = other[3].z;
 	float o33 = other[3].w;
 
-	Mat4 temp;
 	temp[0].x = m00 * o00 + m01 * o10 + m02 * o20 + m03 * o30;
 	temp[0].y = m00 * o01 + m01 * o11 + m02 * o21 + m03 * o31;
 	temp[0].z = m00 * o02 + m01 * o12 + m02 * o22 + m03 * o32;
@@ -346,11 +369,13 @@ Mat4 Mat4::operator*(const Mat4& other) const {
 	temp[3].y = m30 * o01 + m31 * o11 + m32 * o21 + m33 * o31;
 	temp[3].z = m30 * o02 + m31 * o12 + m32 * o22 + m33 * o32;
 	temp[3].w = m30 * o03 + m31 * o13 + m32 * o23 + m33 * o33;
+	*/
 	return temp;
 }
 
 // TODO: Fix
 Mat4& Mat4::operator*=(const Mat4& other) {
+	/*
 	float m00 = M[0].x;
 	float m01 = M[0].y;
 	float m02 = M[0].z;
@@ -406,23 +431,29 @@ Mat4& Mat4::operator*=(const Mat4& other) {
 	temp[3].z = m30 * o02 + m31 * o12 + m32 * o22 + m33 * o32;
 	temp[3].w = m30 * o03 + m31 * o13 + m32 * o23 + m33 * o33;
 	*this = temp;
+	*/
 	return *this;
 }
 
 Mat4 Mat4::operator*(const float& scale) const {
+
 	Mat4 temp = *this;
+	/*
 	temp[0] *= scale;
 	temp[1] *= scale;
 	temp[2] *= scale;
 	temp[3] *= scale;
+	*/
 	return temp;
 }
 
 Mat4& Mat4::operator*=(const float& scale) {
+	/*
 	M[0] *= scale;
 	M[1] *= scale;
 	M[2] *= scale;
 	M[3] *= scale;
+	*/
 	return *this;
 }
 

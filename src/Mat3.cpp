@@ -12,9 +12,20 @@ Mat3::Mat3(const float x0, const float x1, const float x2,
 	       const float y0, const float y1, const float y2,
 	       const float z0, const float z1, const float z2) 
 {
+	/*
 	M[0] = Vec3(x0, x1, x2);
 	M[1] = Vec3(y0, y1, y2);
 	M[2] = Vec3(z0, z1, z2);
+	*/
+	M_test[0][0] = x0;
+	M_test[0][1] = x1;
+	M_test[0][2] = x2;
+	M_test[1][0] = y0;
+	M_test[1][1] = y1;
+	M_test[1][2] = y2;
+	M_test[2][0] = z0;
+	M_test[2][1] = z1;
+	M_test[2][2] = z2;
 }
 
 Mat3::Mat3(Vec3& x, Vec3& y, Vec3& z) {
@@ -72,6 +83,7 @@ void Mat3::Transpose() {
 	M[1].z = temp;
 }
 
+/*
 Mat3 Mat3::Adjoint() {
 	Mat3 adj;
 	adj[0].x = (M[1].y * M[2].z) - (M[1].z * M[2].y);
@@ -87,6 +99,40 @@ Mat3 Mat3::Adjoint() {
 	adj[2].z = (M[0].x * M[1].y) - (M[0].y * M[1].x);
 	return adj;
 }
+*/
+
+/*
+Mat3 Mat3::Adjoint() {
+	Mat3 adj;
+	adj[0].v[0] = (M[1].v[1] * M[2].v[2]) - (M[1].v[2] * M[2].v[1]);
+	adj[0].v[1] = -1 * ((M[1].v[0] * M[2].v[2]) - (M[1].v[2] * M[2].v[0]));
+	adj[0].v[2] = (M[1].v[0] * M[2].v[1]) - (M[1].v[1] * M[2].v[0]);
+
+	adj[1].v[0] = -1 * ((M[0].v[1] * M[2].v[2]) - (M[0].v[2] * M[2].v[1]));
+	adj[1].v[1] = (M[0].v[0] * M[2].v[2]) - (M[0].v[2] * M[2].v[0]);
+	adj[1].v[2] = -1 * ((M[0].v[0] * M[2].v[1]) - (M[0].v[1] * M[2].v[0]));
+
+	adj[2].v[0] = (M[0].v[1] * M[1].v[2]) - (M[0].v[2] * M[1].v[1]);
+	adj[2].v[1] = -1 * ((M[0].v[0] * M[1].v[2]) - (M[0].v[2] * M[1].v[0]));
+	adj[2].v[2] = (M[0].v[0] * M[1].v[1]) - (M[0].v[1] * M[1].v[0]);
+	return adj;
+}
+*/
+Mat3 Mat3::Adjoint() {
+	Mat3 adj;
+	adj.M_test[0][0] = (M_test[1][1] * M_test[2][2]) - (M_test[1][2] * M_test[2][1]);
+	adj.M_test[0][1] = -1 * ((M_test[1][0] * M_test[2][2]) - (M_test[1][2] * M_test[2][0]));
+	adj.M_test[0][2] = (M_test[1][0] * M_test[2][1]) - (M_test[1][1] * M_test[2][0]);
+
+	adj.M_test[1][0] = -1 * ((M_test[0][1] * M_test[2][2]) - (M_test[0][2] * M_test[2][1]));
+	adj.M_test[1][1] = (M_test[0][0] * M_test[2][2]) - (M_test[0][2] * M_test[2][0]);
+	adj.M_test[1][2] = -1 * ((M_test[0][0] * M_test[2][1]) - (M_test[0][1] * M_test[2][0]));
+
+	adj.M_test[2][0] = (M_test[0][1] * M_test[1][2]) - (M_test[0][2] * M_test[1][1]);
+	adj.M_test[2][1] = -1 * ((M_test[0][0] * M_test[1][2]) - (M_test[0][2] * M_test[1][0]));
+	adj.M_test[2][2] = (M_test[0][0] * M_test[1][1]) - (M_test[0][1] * M_test[1][0]);
+	return adj;
+}
 
 // Uses https://www.geometrictools.com/Documentation/LaplaceExpansionTheorem.pdf
 void Mat3::Invert() {
@@ -97,7 +143,16 @@ void Mat3::Invert() {
 	}
 	else {
 		*this = Adjoint();
-		*this /= det;
+		// *this /= det;
+		M_test[0][0] /= det;
+		M_test[0][1] /= det;
+		M_test[0][2] /= det;
+		M_test[1][0] /= det;
+		M_test[1][1] /= det;
+		M_test[1][2] /= det;
+		M_test[2][0] /= det;
+		M_test[2][1] /= det;
+		M_test[2][2] /= det;
 	}
 }
 
@@ -225,6 +280,11 @@ Mat3& Mat3::operator/=(const float& scale) {
 	M[1] /= scale;
 	M[2] /= scale;
 	return *this;
+}
+
+float Mat3::at(int x, int y) const
+{
+	return M_test[x][y];
 }
 
 Vec3& Mat3::operator[](const int index) {

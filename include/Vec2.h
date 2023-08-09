@@ -45,6 +45,7 @@ public:
 
 	float x;
 	float y;
+	float v[2];
 };
 
 inline std::string Vec2::to_string(bool brackets)
@@ -55,7 +56,8 @@ inline std::string Vec2::to_string(bool brackets)
 }
 
 inline float Vec2::Length() const {
-	return sqrtf(x * x + y * y);
+	// return sqrtf(x * x + y * y);
+	return sqrtf(v[0] * v[0] + v[1] * v[1]);
 }
 
 inline float Vec2::Dot(const Vec2& other) const {
@@ -121,11 +123,13 @@ inline Vec2& Vec2::operator/=(const float scale) {
 }
 
 inline float& Vec2::operator[](const int index) {
-	return index ? y : x;
+	// return index ? y : x;
+	return v[index];
 }
 
 inline const float& Vec2::operator[](const int index) const {
-	return index ? y : x;
+	// return index ? y : x;
+	return v[index];
 }
 
 inline bool Vec2::operator==(const Vec2& other) const

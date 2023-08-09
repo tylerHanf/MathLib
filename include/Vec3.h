@@ -49,6 +49,7 @@ public:
 	float x;
 	float y;
 	float z;
+	float v[3];
 };
 
 inline std::string Vec3::to_string(bool brackets)
@@ -151,19 +152,26 @@ inline Vec3& Vec3::operator/=(const float scale) {
 }
 
 inline float& Vec3::operator[](const int index) {
+	/*
 	if (index == 0)
 		return x;
 	if (index == 1)
 		return y;
 	return z;
+	*/
+	return v[index];
 }
 
 inline const float& Vec3::operator[](const int index) const {
+	/*
 	if (index == 0)
 		return x;
 	if (index == 1)
 		return y;
 	return z;
+	*/
+
+	return v[index];
 }
 
 inline bool Vec3::operator==(const Vec3& other) const
