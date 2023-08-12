@@ -70,7 +70,6 @@ public:
 		float m[4][4];
 		__m128 mv[4];
 	};
-	Vec4 M[4];
 
 private:
 	void SetErrorMat(void);
@@ -128,17 +127,9 @@ inline Mat4 Mat4::GetTranspose() const {
 	return temp;
 }
 
-// Check
 inline void Mat4::Translate(const Vec3& pos) {
-	/*
-	m[3][0] += pos[0];
-	m[3][1] += pos[1];
-	m[3][2] += pos[2];
-	*/
-	/*
-	mv[3] = _mm_load_ps((float const*)&m[3][0]);
-	_mm_add_ps()
-	*/
+	__m128 posV = _mm_load_ps({ pos.v[0], pos.v[1], pos.v[2], 0 });
+	mv[3] = _mm_add_ps(mv[3], posV);
 }
 
 inline void Mat4::Scale(const Vec3& scale) {
@@ -160,11 +151,10 @@ inline Mat4 Mat4::TranslateMatrix(const Vec3& val) {
 }
 
 inline Mat4 Mat4::ScaleMatrix(const Vec3& scale) {
-	Mat4 temp;
-	temp.m[0][0] = scale.v[0];
-	temp.m[1][1] = scale.v[1];
-	temp.m[2][2] = scale.v[2];
-	return temp;
+	return Mat4(scale.v[0], 0, 0, 0,
+		        0, scale.v[1], 0, 0,
+		        0, 0, scale.v[2], 0,
+		        0, 0, 0, 1.f);
 }
 
 inline Vec4 Mat4::operator[](const int index) {

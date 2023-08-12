@@ -3,12 +3,11 @@
 #include "Logger.h"
 #include <math.h>
 
-Mat4::Mat4() 
+Mat4::Mat4() : m{{1.f, 0.f, 0.f, 0.f}, 
+	             {0.f, 1.f, 0.f, 0.f}, 
+	             {0.f, 0.f, 1.f, 0.f}, 
+	             {0.f, 0.f, 0.f, 1.f}}
 {
-	M[0] = Vec4(1.0f, 0.0f, 0.0f, 0.0f);
-	M[1] = Vec4(0.0f, 1.0f, 0.0f, 0.0f);
-	M[2] = Vec4(0.0f, 0.0f, 1.0f, 0.0f);
-	M[3] = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 Mat4::Mat4(const float x0, const float x1, const float x2, const float w0,
@@ -16,57 +15,46 @@ Mat4::Mat4(const float x0, const float x1, const float x2, const float w0,
 	const float z0, const float z1, const float z2, const float w2,
 	const float px, const float py, const float pz, const float w3)
 {
-	/*
-	M[0] = Vec4(x0, x1, x2, w0);
-	M[1] = Vec4(y0, y1, y2, w1);
-	M[2] = Vec4(z0, z1, z2, w2);
-	M[3] = Vec4(px, py, pz, w3);
-	*/
-	m[0][0] = x0;
+	m[0][0] = x0; 
 	m[0][1] = x1; 
 	m[0][2] = x2; 
 	m[0][3] = w0;
-	m[1][0] = y0;
+
+	m[1][0] = y0; 
 	m[1][1] = y1; 
 	m[1][2] = y2; 
 	m[1][3] = w1;
-	m[2][0] = z0;
+
+	m[2][0] = z0; 
 	m[2][1] = z1; 
 	m[2][2] = z2; 
 	m[2][3] = w2;
-	m[3][0] = px;
+
+	m[3][0] = px; 
 	m[3][1] = py; 
 	m[3][2] = pz; 
 	m[3][3] = w3;
-
 }
 
 Mat4::Mat4(const Mat4& other) {
-	M[0] = other.M[0];
-	M[1] = other.M[1];
-	M[2] = other.M[2];
-	M[3] = other.M[3];
+	memcpy(&m[0][0], &other.m[0][0], 16 * sizeof(float));
 }
 
 Mat4::Mat4(const Mat3& dcm, const Vec3& pos) {
-	M[0] = Vec4(dcm.M[0], 0.0f);
-	M[1] = Vec4(dcm.M[1], 0.0f);
-	M[2] = Vec4(dcm.M[2], 0.0f);
-	M[3] = Vec4(pos.x, pos.y, pos.z, 1.0f);
+	memcpy(&m[0][0], &dcm.m[0][0], 3 * sizeof(float));
+	memcpy(&m[1][0], &dcm.m[1][0], 3 * sizeof(float));
+	memcpy(&m[2][0], &dcm.m[2][0], 3 * sizeof(float));
+	memcpy(&m[3][0], &pos.v[0], 3 * sizeof(float));
 }
 
 Mat4::Mat4(const Mat3& dcm) {
-	M[0] = Vec4(dcm.M[0], 0.0);
-	M[1] = Vec4(dcm.M[1], 0.0);
-	M[2] = Vec4(dcm.M[2], 0.0);
-	M[3] = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
+	memcpy(&m[0][0], &dcm.m[0][0], 3 * sizeof(float));
+	memcpy(&m[1][0], &dcm.m[1][0], 3 * sizeof(float));
+	memcpy(&m[2][0], &dcm.m[2][0], 3 * sizeof(float));
 }
 
 Mat4::Mat4(const Vec3& pos) {
-	M[0] = Vec4(1.0f, 0.0f, 0.0f, 0.0f);
-	M[1] = Vec4(0.0f, 1.0f, 0.0f, 0.0f);
-	M[2] = Vec4(0.0f, 0.0f, 1.0f, 0.0f);
-	M[3] = Vec4(pos.x, pos.y, pos.z, 1.0f);
+	memcpy(&m[3][0], &pos.v[0], 3 * sizeof(float));
 }
 
 Mat4::Mat4(const Quaternion& q) {
@@ -140,11 +128,6 @@ Mat4 Mat4::LookAt(Vec3 eye, Vec3 at, Vec3 up) {
 	Vec3 xaxis = Vec3::Unit(zaxis.Cross(up));
 	Vec3 yaxis = xaxis.Cross(zaxis);
 	zaxis *= -1;
-
-	/*
-	Mat4 viewMat = Mat4(Mat3(xaxis, yaxis, zaxis),
-		                Vec3(-xaxis.Dot(eye), -yaxis.Dot(eye), -zaxis.Dot(eye)));
-	*/
 
 	Mat4 viewMat(xaxis.x, yaxis.x, zaxis.x, 0.0f,
 				 xaxis.y, yaxis.y, zaxis.y, 0.0f,

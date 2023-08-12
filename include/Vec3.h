@@ -46,9 +46,6 @@ public:
 
 	bool operator==(const Vec3& other) const;
 
-	float x;
-	float y;
-	float z;
 	float v[3];
 };
 
