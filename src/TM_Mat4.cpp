@@ -5,9 +5,9 @@
  * @version 0.1
  * @date 2023-08-12
  */
-#include "Mat4.h"
+#include "TM_Mat4.h"
 #include "Logger.h"
-#include "Mat3.h"
+#include "TM_Mat3.h"
 #include <math.h>
 #include <stdio.h>
 
@@ -242,53 +242,47 @@ void Mat4::Invert() {
 }
 
 Mat4 &Mat4::operator=(const Mat4 &other) {
-  M[0] = other.M[0];
-  M[1] = other.M[1];
-  M[2] = other.M[2];
-  M[3] = other.M[3];
-
+  memcpy(&m[0][0], &other.m[0][0], 16 * sizeof(float));
   return *this;
 }
 
 Mat4 Mat4::operator+(const Mat4 &other) const {
   Mat4 temp;
-  temp.M[0] = M[0] + other.M[0];
-  temp.M[1] = M[1] + other.M[1];
-  temp.M[2] = M[2] + other.M[2];
-  temp.M[3] = M[3] + other.M[3];
-
+  temp.mv[0] = _mm_add_ps(mv[0], other.mv[0]);
+  temp.mv[1] = _mm_add_ps(mv[1], other.mv[1]);
+  temp.mv[2] = _mm_add_ps(mv[2], other.mv[2]);
+  temp.mv[3] = _mm_add_ps(mv[3], other.mv[3]);
   return temp;
 }
 
 Mat4 &Mat4::operator+=(const Mat4 &other) {
-  M[0] += other.M[0];
-  M[1] += other.M[1];
-  M[2] += other.M[2];
-  M[3] += other.M[3];
-
+  mv[0] = _mm_add_ps(mv[0], other.mv[0]);
+  mv[1] = _mm_add_ps(mv[1], other.mv[1]);
+  mv[2] = _mm_add_ps(mv[2], other.mv[2]);
+  mv[3] = _mm_add_ps(mv[3], other.mv[3]);
   return *this;
 }
 
 void Mat4::SetErrorMat() {
-  M[0].x = INFINITY;
-  M[0].y = -INFINITY;
-  M[0].z = INFINITY;
-  M[0].w = -INFINITY;
+  m[0][0] = INFINITY;
+  m[0][1] = -INFINITY;
+  m[0][2] = INFINITY;
+  m[0][3] = -INFINITY;
 
-  M[1].x = -INFINITY;
-  M[1].y = INFINITY;
-  M[1].z = -INFINITY;
-  M[1].w = INFINITY;
+  m[1][0] = -INFINITY;
+  m[1][1] = INFINITY;
+  m[1][2] = -INFINITY;
+  m[1][3] = INFINITY;
 
-  M[2].x = INFINITY;
-  M[2].y = -INFINITY;
-  M[2].z = INFINITY;
-  M[2].w = -INFINITY;
+  m[2][0] = INFINITY;
+  m[2][1] = -INFINITY;
+  m[2][2] = INFINITY;
+  m[2][3] = -INFINITY;
 
-  M[3].x = -INFINITY;
-  M[3].y = INFINITY;
-  M[3].z = -INFINITY;
-  M[3].w = INFINITY;
+  m[3][0] = -INFINITY;
+  m[3][1] = INFINITY;
+  m[3][2] = -INFINITY;
+  m[3][3] = INFINITY;
 }
 
 Mat4 Mat4::operator*(const Mat4 &other) const {
@@ -416,39 +410,39 @@ Mat4 &Mat4::operator*=(const Mat4 &other) {
 
 Mat4 Mat4::operator*(const float &scale) const {
 
-  Mat4 temp = *this;
-  /*
-  temp[0] *= scale;
-  temp[1] *= scale;
-  temp[2] *= scale;
-  temp[3] *= scale;
-  */
+  Mat4 temp;
+  __m128 scalev = _mm_set_ps1(scale);
+  temp.mv[0] = _mm_mul_ps(temp.mv[0], scalev);
+  temp.mv[1] = _mm_mul_ps(temp.mv[1], scalev);
+  temp.mv[2] = _mm_mul_ps(temp.mv[2], scalev);
+  temp.mv[3] = _mm_mul_ps(temp.mv[3], scalev);
   return temp;
 }
 
 Mat4 &Mat4::operator*=(const float &scale) {
-  /*
-  M[0] *= scale;
-  M[1] *= scale;
-  M[2] *= scale;
-  M[3] *= scale;
-  */
+  __m128 scalev = _mm_set_ps1(scale);
+  mv[0] = _mm_mul_ps(mv[0], scalev);
+  mv[1] = _mm_mul_ps(mv[1], scalev);
+  mv[2] = _mm_mul_ps(mv[2], scalev);
+  mv[3] = _mm_mul_ps(mv[3], scalev);
   return *this;
 }
 
 Mat4 Mat4::operator/(const float &scale) const {
   Mat4 temp = *this;
-  temp[0] /= scale;
-  temp[1] /= scale;
-  temp[2] /= scale;
-  temp[3] /= scale;
+  __m128 scalev = _mm_set_ps1(scale);
+  temp.mv[0] = _mm_div_ps(temp.mv[0], scalev);
+  temp.mv[1] = _mm_div_ps(temp.mv[1], scalev);
+  temp.mv[2] = _mm_div_ps(temp.mv[2], scalev);
+  temp.mv[3] = _mm_div_ps(temp.mv[3], scalev);
   return temp;
 }
 
 Mat4 &Mat4::operator/=(const float &scale) {
-  M[0] /= scale;
-  M[1] /= scale;
-  M[2] /= scale;
-  M[3] /= scale;
+  __m128 scalev = _mm_set_ps1(scale);
+  mv[0] = _mm_div_ps(mv[0], scalev);
+  mv[1] = _mm_div_ps(mv[1], scalev);
+  mv[2] = _mm_div_ps(mv[2], scalev);
+  mv[3] = _mm_div_ps(mv[3], scalev);
   return *this;
 }

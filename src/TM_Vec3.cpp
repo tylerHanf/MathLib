@@ -1,7 +1,7 @@
-#include "Vec3.h"
-#include "Mat4.h"
-#include "Vec2.h"
-#include "Vec4.h"
+#include "TM_Vec3.h"
+#include "TM_Mat4.h"
+#include "TM_Vec2.h"
+#include "TM_Vec4.h"
 #include <math.h>
 
 Vec3::Vec3() : v{0.0f, 0.0f, 0.0f} {}

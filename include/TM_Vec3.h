@@ -67,13 +67,14 @@ inline std::string Vec3::to_string(bool brackets) {
 
 inline float Vec3::Length() const {
   V3 sq;
-  sq.vv = _mm_mul_ps(v.vv);
+  sq.vv = _mm_mul_ps(vv, vv);
   return sqrtf(sq.x + sq.y + sq.y);
 }
 
 inline float Vec3::Dot(const Vec3 &other) const {
-  V3 mult = _mm_mul_ps(v.vv, other.vv);
-  return mult.x + mult.y + mult.z;
+  V3 mult;
+  mult.vv = _mm_mul_ps(vv, other.vv);
+  return (mult.x + mult.y + mult.z);
 }
 
 inline bool Vec3::IsLeftOf(const Vec3 &other) const {
@@ -81,9 +82,7 @@ inline bool Vec3::IsLeftOf(const Vec3 &other) const {
 }
 
 inline Vec3 &Vec3::operator=(const Vec3 &other) {
-  x = other.x;
-  y = other.y;
-  z = other.z;
+  memcpy(&v[0], &other.v[0], 3 * sizeof(float));
   return *this;
 }
 
@@ -111,13 +110,13 @@ inline Vec3 &Vec3::operator-=(const Vec3 &other) {
 
 inline Vec3 Vec3::operator*(const float scale) const {
   Vec3 temp;
-  __m128 scalev = _mm_set_ps1(&scale);
+  __m128 scalev = _mm_set_ps1(scale);
   temp.vv = _mm_mul_ps(vv, scalev);
   return temp;
 }
 
 inline Vec3 &Vec3::operator*=(const float scale) {
-  __m128 scalev = _mm_set_ps1(&scale);
+  __m128 scalev = _mm_set_ps1(scale);
   vv = _mm_mul_ps(vv, scalev);
   return *this;
 }
@@ -125,7 +124,7 @@ inline Vec3 &Vec3::operator*=(const float scale) {
 inline Vec3 Vec3::operator/(const float scale) const {
   Vec3 temp;
   if (scale != 0.0f) {
-    __m128 scalev = _mm_set_ps1(&scale);
+    __m128 scalev = _mm_set_ps1(scale);
     temp.vv = _mm_div_ps(vv, scalev);
   } else {
     Logger::Log("DIVISION BY ZERO");
@@ -135,7 +134,7 @@ inline Vec3 Vec3::operator/(const float scale) const {
 
 inline Vec3 &Vec3::operator/=(const float scale) {
   if (scale != 0.0f) {
-    __m128 scalev = _mm_set_ps1(&scale);
+    __m128 scalev = _mm_set_ps1(scale);
     vv = _mm_div_ps(vv, scalev);
   } else {
     Logger::Log("DIVISION BY ZERO");
@@ -148,5 +147,7 @@ inline float &Vec3::operator[](const int index) { return v[index]; }
 inline const float &Vec3::operator[](const int index) const { return v[index]; }
 
 inline bool Vec3::operator==(const Vec3 &other) const {
-  return (x == other.x) && (y == other.y) && (z == other.z);
+  V3 equal;
+  equal.vv = _mm_cmpeq_ps(vv, other.vv);
+  return (equal.x || equal.y || equal.z);
 }

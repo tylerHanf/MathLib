@@ -92,20 +92,20 @@ union Q {
 /**
  * @brief Vec4 simd
  */
-union _V4 {
+union V4 {
   _V4_IMPL
 };
 
 /**
  * @brief Vec3 simd
  */
-union _V3 {
+union V3 {
   _V3_IMPL
 };
 
 /**
  * @brief Vec2 simd
  */
-union _V2 {
+union V2 {
   _V2_IMPL
 };
