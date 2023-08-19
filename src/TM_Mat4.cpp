@@ -62,35 +62,61 @@ Mat4::Mat4(const Mat3 &dcm) {
 Mat4::Mat4(const Vec3 &pos) { memcpy(&m[3][0], &pos.v[0], 3 * sizeof(float)); }
 
 Mat4::Mat4(const Quaternion &q) {
+	// s = square
+	// 2 = double
+	// i = 3 component imaginary
+	// a = add
+	// m = minus
   Vec4 i = q.Imaginary();
-  __m128 iv = _mm_load_ps(&i[0]);
-  float r(q.r);
-
+  V3 iv; // [x, y, z]
+  V3 i_s; // [x^2, y^2, z^2] 
+  V3 i_2; // [2x, 2y, 2z]
+  V3 i_2_r; // [2rx, 2ry, 2rz]
+  V3 i_s_2; // [2x^2, 2y^2, 2z^z]
+  V3 i_2_i; // [2xy, 2yz, 2xz]
+  V3 i_2_i_a_i_2_r; // [2xy+2rz, 2yz+2rx, 2zx+2ry]
+  V3 i_2_i_m_i_2_r; // [2xy-2rz, 2yz-2rx, 2zx-2ry]
+  V3 one_m_i_s_2; // [1-2x^2, 1-2y^2, 1-2z^2]
+  V3 one_m_i_s_2_i_s_2; // [1-2x^2-2z^2, 1-2y^2-2z^2, 1-2x^2-2y^2]
+  const float r(q.r);
   const float two_f(2.f);
-  __m128 two_v = _mm_load1_ps(&two_f);
-  __m128 i_sqr = _mm_mul_ps(iv, iv);
-  __m128 i_dub = _mm_mul_ps(iv, two_v);
 
-  m[0][0] = 1 - i_dub[1] - i_dub[2];
-  M[0][1] = 2 * i.x * i.y + 2 * r * i.z;
-  M[0][2] = 2 * i.x * i.z - 2 * r * i.y;
+  __m128 two_v = _mm_set_ps1(2.f);
+  __m128 one_v = _mm_set_ps1(1.f);
+  __m128 r_v = _mm_set_ps1(r);
+  iv.vv = _mm_load_ps(&i[0]);
+  i_s.vv = _mm_mul_ps(iv.vv, iv.vv);
+  i_2.vv = _mm_mul_ps(iv.vv, two_v);
+  i_s_2.vv = _mm_mul_ps(i_s.vv, two_v);
+  i_2_r.vv = _mm_mul_ps(i_2.vv, r_v.vv);
+  i_2_i.vv = _mm_mul_ps(i_2.vv, _mm_shuffle_ps(iv.vv, { 1, 2, 0, 3 }));
+  i_2_i_a_i_2_r.vv = _mm_add_ps(i_2_i.vv, _mm_shuffle_ps(i_2_r.vv, {2, 0, 1, 0}));
+  i_2_i_m_i_2_r.vv = _mm_sub_ps(i_2_i.vv, _mm_shuffle_ps(i_2_r.vv, {2, 0, 1, 0}));
+  one_m_i_s_2.vv = _mm_sub_ps(one_v, i_s_2.vv); 
+  one_m_i_s_2_i_s_2.vv = _mm_sub_ps(_mm_shuffle_ps(one_m_i_s_2.vv, { 0, 1, 0, 0 }), _mm_shuffle_ps(i_s_2.vv, { 2, 2, 1, 0 }));
 
-  M[1].x = 2 * i.x * i.y - 2 * r * i.z;
-  M[1].y = 1 - 2 * x2 - 2 * z2;
-  M[1].z = 2 * i.y * i.z + 2 * r * i.x;
+  m[0][0] = one_m_i_s_2_i_s_2.y;
+  m[0][1] = i_2_i_a_i_2_r.x;
+  m[0][2] = i_2_i_m_i_2_r.z;
 
-  M[2].x = 2 * i.x * i.z + 2 * r * i.y;
-  M[2].y = 2 * i.y * i.z - 2 * r * i.x;
-  M[2].z = 1 - 2 * x2 - 2 * y2;
+  m[1][0] = i_2_i_m_i_2_r.x;
+  m[1][1] = one_m_i_s_2_i_s_2.x;
+  m[1][2] = i_2_i_a_i_2_r.y;
 
-  M[3] = Vec4(0.0f, 0.0f, 0.0f, 1.0f);
+  m[2][0] = i_2_i_a_i_2_r.z;
+  m[2][1] = i_2_i_m_i_2_r.y;
+  m[2][2] = one_m_i_s_2_i_s_2.z;
+
+  m[3][0] = 0.0f;
+  m[3][1] = 0.0f; 
+  m[3][2] = 0.0f;
+  m[3][3] = 1.0f;
 }
 
 Mat4 Mat4::Perspective(const float aspect, const float vertFOV,
                        const float nearPlane, const float farPlane) {
-  float c = 1.0f / tan(vertFOV / 2.0f);
+  float c = 1.0f / tanf(vertFOV / 2.0f);
   float r = nearPlane / c;
-  float l = -r;
   float m00 = c / aspect;
   float m22 = -(farPlane + nearPlane) / (farPlane - nearPlane);
   float m32 = -(2 * nearPlane * farPlane) / (farPlane - nearPlane);

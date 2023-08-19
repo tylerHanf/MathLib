@@ -12,7 +12,7 @@
 #include "TM_Types.h"
 #include "TM_Vec3.h"
 #include "TM_Vec4.h"
-#include "T_Mat3.h"
+#include "TM_Mat3.h"
 
 // Defs
 class Mat4 {
@@ -85,12 +85,12 @@ inline const float *Mat4::ConstPtr(void) const { return &(m[0][0]); }
 inline std::string Mat4::to_string(void) {
   std::string str(
       "(" + std::to_string(m[0][0]) + ", " + std::to_string(m[0][1]) + ", " +
-          std::to_string(m[0][2]) + ", " + std::to_string(m[0][3]) + ",\n";
-      +std::to_string(m[1][0]) + ", " + std::to_string(m[1][1]) + ", " +
-      std::to_string(m[1][2]) + ", " + std::to_string(m[1][3]) + ",\n";
-      +std::to_string(m[2][0]) + ", " + std::to_string(m[2][1]) + ", " +
-      std::to_string(m[2][2]) + ", " + std::to_string(m[2][3]) + ",\n";
-      +std::to_string(m[3][0]) + ", " + std::to_string(m[3][1]) + ", " +
+          std::to_string(m[0][2]) + ", " + std::to_string(m[0][3]) + ",\n" +
+      std::to_string(m[1][0]) + ", " + std::to_string(m[1][1]) + ", " +
+      std::to_string(m[1][2]) + ", " + std::to_string(m[1][3]) + ",\n" +
+      std::to_string(m[2][0]) + ", " + std::to_string(m[2][1]) + ", " +
+      std::to_string(m[2][2]) + ", " + std::to_string(m[2][3]) + ",\n" +
+      std::to_string(m[3][0]) + ", " + std::to_string(m[3][1]) + ", " +
       std::to_string(m[3][2]) + ", " + std::to_string(m[3][3]) + ")");
 
   return str;
@@ -123,8 +123,7 @@ inline Mat4 Mat4::GetTranspose() const {
 }
 
 inline void Mat4::Translate(const Vec3 &pos) {
-  __m128 posV = _mm_load_ps(pos.vv);
-  mv[3] = _mm_add_ps(mv[3], posV);
+  mv[3] = _mm_add_ps(mv[3], pos.vv);
 }
 
 inline void Mat4::Scale(const Vec3 &scale) {
