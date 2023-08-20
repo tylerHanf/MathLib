@@ -115,34 +115,39 @@ Mat4::Mat4(const Quaternion &q) {
 
 Mat4 Mat4::Perspective(const float aspect, const float vertFOV,
                        const float nearPlane, const float farPlane) {
-  float c = 1.0f / tanf(vertFOV / 2.0f);
-  float r = nearPlane / c;
-  float m00 = c / aspect;
-  float m22 = -(farPlane + nearPlane) / (farPlane - nearPlane);
-  float m32 = -(2 * nearPlane * farPlane) / (farPlane - nearPlane);
+  float c = 1.0f / tanf(vertFOV / 2.0f); // 1.0 / tanf(vertFOV/2
+  float f_min_p = farPlane - nearPlane;
 
-  Mat4 perspective = Mat4(m00, 0.0, 0.0, 0.0, 0.0, c, 0.0, 0.0, 0.0, 0.0, m22,
-                          -1.0, 0.0, 0.0, m32, 0.0);
+  V3 fast_div = {c, -(farPlane + nearPlane), -(2 * nearPlane * farPlane) };
+  V3 fast_div_by = { aspect, f_min_p, f_min_p };
+  fast_div_top.vv = _mm_div_ps(fast_div.vv, fast_div_by.vv);
+
+  Mat4 perspective = Mat4(fast_div.x, 0.0, 0.0, 0.0, 0.0, c, 0.0, 0.0, 0.0, 0.0, fast_div.y,
+                          -1.0, 0.0, 0.0, fast_div.z, 0.0);
   return perspective;
 }
 
 Mat4 Mat4::Orthographic(const float aspect, const float vertFOV,
                         const float nearPlane, const float farPlane) {
+    // TODO: Can make faster if desired
   float c = 1.0 / tanf(vertFOV / 2.0);
   float r = nearPlane / c;
   float l = -r;
   float t = aspect * nearPlane / c;
   float b = -t;
+  float d = farPlane - nearPlane;
+  float f = r - l;
+  float k = t - b;
 
-  float m00 = 2.0f / (r - l);
-  float m11 = (2.0f * nearPlane) / (t - b);
-  float m22 = -2.0f / (farPlane - nearPlane);
-  float m30 = -(r + l) / (r - l);
-  float m31 = -(t + b) / (t - b);
-  float m32 = -(farPlane + nearPlane) / (farPlane - nearPlane);
+  V3 fast_divA = { 2.0f, 2.0f * nearPlane, -2.0f };
+  V3 fast_div_by = { f, k, d };
+  fast_divA.vv = _mm_div_ps(fast_divA.vv, fast_div_by.vv);
 
-  Mat4 orthographic = Mat4(m00, 0.0, 0.0, 0.0, 0.0, m11, 0.0, 0.0, 0.0, 0.0,
-                           m22, 0.0, m30, m31, m32, 1.0);
+  V3 fast_divB = { -(r + l), -(t + b), -(farPlane + nearPlane) };
+  fast_divB.vv = _mm_div_ps(fast_divB.vv, fast_div_by.vv);
+
+  Mat4 orthographic = Mat4(fast_divA.x, 0.0, 0.0, 0.0, 0.0, fast_divA.y, 0.0, 0.0, 0.0, 0.0,
+                           fast_divA.z, 0.0, fast_divB.x, fast_divB.y, fast_divB.z, 1.0);
   return orthographic;
 }
 
@@ -161,24 +166,21 @@ Mat4 Mat4::LookAt(Vec3 eye, Vec3 at, Vec3 up) {
 // Uses Laplace Expansion Theorem:
 // https://www.geometrictools.com/Documentation/LaplaceExpansionTheorem.pdf
 float Mat4::Determinant() {
+  V4 mid_l = { m[2][0], m[2][0], m[0][0], m[0][0] };
+  V4 mid_r = { m[2][2], m[2][1], m[0][1], m[0][2] };
 
-  // Speed up time by reducing look ups repeatedly
-  float m00 = m[0].x;
-  float m01 = m[0].y;
-  float m02 = m[0].z;
-  float m03 = m[0].w;
-  float m10 = m[1].x;
-  float m11 = m[1].y;
-  float m12 = m[1].z;
-  float m13 = m[1].w;
-  float m20 = m[2].x;
-  float m21 = M[2].y;
-  float m22 = M[2].z;
-  float m23 = M[2].w;
-  float m30 = M[3].x;
-  float m31 = M[3].y;
-  float m32 = M[3].z;
-  float m33 = M[3].w;
+  V4 i_l;
+  V4 i_r;
+  V4 j_l;
+  V4 j_r;
+  V4 k_l;
+  V4 k_r;
+
+  i_l.vv = _mm_mul_ps(_mm_shuffle_ps(mv[2], {2, 1, 1, 0}), _mm_shuffle_ps(mv[3], {3, 3, 2, 3}));
+  i_r.vv = _mm_mul_ps(_mm_shuffle_ps(mv[2], { 3, 3, 2, 3 }), _mm_shuffle_ps(mv[3], { 2, 1, 1, 0 }));
+
+  j_l.vv = _mm_mul_ps(_mm_shuffle_ps(mid_l.vv, ))
+
 
   float c5 = (m22 * m33) - (m23 * m32);
   float c4 = (m21 * m33) - (m23 * m31);
