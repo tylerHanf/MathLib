@@ -165,9 +165,12 @@ Mat4 Mat4::LookAt(Vec3 eye, Vec3 at, Vec3 up) {
 
 // Uses Laplace Expansion Theorem:
 // https://www.geometrictools.com/Documentation/LaplaceExpansionTheorem.pdf
-float Mat4::Determinant() {
-  V4 mid_l = { m[2][0], m[2][0], m[0][0], m[0][0] };
-  V4 mid_r = { m[2][2], m[2][1], m[0][1], m[0][2] };
+// Possibly inline this
+float Mat4::Determinant(void) const {
+  V4 mid_ll = { m[2][0], m[2][0], m[0][0], m[0][0] };
+  V4 mid_lr = { m[3][2], m[3][1], m[1][1], m[1][2] };
+  V4 mid_rl = { m[2][2], m[2][1], m[0][1], m[0][2] };
+  V4 mid_rr = { m[3][0], m[3][0], m[1][0], m[1][0] };
 
   V4 i_l;
   V4 i_r;
@@ -176,29 +179,31 @@ float Mat4::Determinant() {
   V4 k_l;
   V4 k_r;
 
+  V4 i;
+  V4 j;
+  V4 k;
+
   i_l.vv = _mm_mul_ps(_mm_shuffle_ps(mv[2], {2, 1, 1, 0}), _mm_shuffle_ps(mv[3], {3, 3, 2, 3}));
   i_r.vv = _mm_mul_ps(_mm_shuffle_ps(mv[2], { 3, 3, 2, 3 }), _mm_shuffle_ps(mv[3], { 2, 1, 1, 0 }));
 
-  j_l.vv = _mm_mul_ps(_mm_shuffle_ps(mid_l.vv, ))
+  j_l.vv = _mm_mul_ps(mid_ll.vv, mid_lr.vv);
+  j_r.vv = _mm_mul_ps(mid_rl.vv, mid_rr.vv);
 
+  k_l.vv = _mm_mul_ps(_mm_shuffle_ps(mv[0], {0, 1, 1, 2}), _mm_shuffle_ps(mv[1], {3, 2, 3, 3}));
+  k_r.vv = _mm_mul_ps(_mm_shuffle_ps(mv[0], { 3, 2, 3, 3 }), _mm_shuffle_ps(mv[1], { 0, 1, 1, 2 }));
 
-  float c5 = (m22 * m33) - (m23 * m32);
-  float c4 = (m21 * m33) - (m23 * m31);
-  float c3 = (m21 * m32) - (m22 * m31);
-  float c2 = (m20 * m33) - (m23 * m30);
-  float c1 = (m20 * m32) - (m22 * m30);
-  float c0 = (m20 * m31) - (m21 * m30);
+  i.vv = _mm_sub_ps(i_l.vv, i_r.vv);
+  j.vv = _mm_sub_ps(j_l.vv, j_r.vv);
+  k.vv = _mm_sub_ps(k_l.vv, k_r.vv);
 
-  float s0 = (m00 * m11) - (m01 * m10);
-  float s1 = (m00 * m12) - (m02 * m10);
-  float s2 = (m00 * m13) - (m03 * m10);
-  float s3 = (m01 * m12) - (m02 * m11);
-  float s4 = (m01 * m13) - (m03 * m11);
-  float s5 = (m02 * m13) - (m03 * m12);
+  V4 muls0 = {j.x, j.y, 0, 0};
+  V4 muls0_r = { i.x, i.y, 0, 0 };
+  V4 muls1;
 
-  float determinant = s0 * c5 - s1 * c4 + s2 * c3 + s3 * c2 - s4 * c1 + s5 * c0;
+  muls0.vv = _mm_mul_ps(muls0.vv, muls0_r.vv);
+  muls1.vv = _mm_mul_ps(k.vv, _mm_shuffle_ps(i.vv, {3, 2, 1, 0}));
 
-  return determinant;
+  return (muls0.x - muls0.y + muls1.x + muls1.y - muls1.z + muls1.w);
 }
 
 // Uses Laplace Expansion Theorem:
@@ -236,14 +241,23 @@ void Mat4::Invert() {
   float s4 = (m01 * m13) - (m03 * m11);
   float s5 = (m02 * m13) - (m03 * m12);
 
-  float determinant = s0 * c5 - s1 * c4 + s2 * c3 + s3 * c2 - s4 * c1 + s5 * c0;
 
-  if (determinant == 0) {
-          Logger::Log("Mat4::Invert Invalid Invert -> Determinant is 0");
-          SetErrorMat();
-  }
-  else {
           Mat4 adj;
+
+          V4 mul_c5 = { m[1][1], m[0][1], m[1][0], m[0][0] };
+          V4 mul_c4 = { m[1][2], m[0][2], m[1][0], m[0][0] };
+          V4 mul_c3 = { m[1][3], m[0][3], m[1][0], m[0][0] };
+          V4 mul_c2 = { m[1][2], m[0][2], m[1][1], m[0][1] };
+          V4 mul_c1 = { m[1][3], m[0][3], m[1][1], m[0][1] };
+          V4 mul_c0 = { m[1][3], m[0][3], m[1][2], m[0][2] };
+
+          V4 mul_s5 = { m[3][1], m[2][1], m[3][0], m[2][0] };
+          V4 mul_s4 = { m[3][2], m[2][2], m[3][0], m[2][0] };
+          V4 mul_s3 = { m[3][3], m[2][3], m[3][0], m[2][0] };
+          V4 mul_s2 = { m[3][2], m[2][2], m[3][1], m[2][1] };
+          V4 mul_s1 = { m[3][3], m[2][3], m[3][1], m[2][1] };
+          V4 mul_s0 = { m[3][3], m[2][3], m[3][2], m[2][2] };
+
           adj[0].x = (m11 * c5) - (m12 * c4) + (m13 * c3);
           adj[0].y = (m01 * c5) + (m02 * c4) - (m03 * c3);
           adj[0].z = (m31 * s5) - (m32 * s4) + (m33 * s3);
@@ -267,6 +281,14 @@ void Mat4::Invert() {
           *this = adj / determinant;
   }
   */
+
+  float determinant = Determinant();
+  if (determinant == 0.f) {
+          Logger::Log("Mat4::Invert Invalid Invert -> Determinant is 0");
+          SetErrorMat();
+  }
+  else {
+  }
 }
 
 Mat4 &Mat4::operator=(const Mat4 &other) {

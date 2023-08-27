@@ -138,6 +138,31 @@ inline void Mat4::Scale(const Vec3 &scale) {
 
 inline Mat4 Mat4::TranslateMatrix(const Vec3 &val) { return Mat4(val); }
 
+inline Mat4 Mat4::Adjoint(void) {
+          Mat4 adj;
+          adj[0].x = (m11 * c5) - (m12 * c4) + (m13 * c3);
+          adj[0].y = (m01 * c5) + (m02 * c4) - (m03 * c3);
+          adj[0].z = (m31 * s5) - (m32 * s4) + (m33 * s3);
+          adj[0].w = -(m21 * s5) + (m22 * s4) - (m23 * s3);
+
+          adj[1].x = -(m10 * c5) + (m12 * c2) - (m13 * c1);
+          adj[1].y = (m00 * c5) - (m02 * c2) + (m03 * c1);
+          adj[1].z = -(m30 * s5) + (m32 * s2) - (m33 * s1);
+          adj[1].w = (m20 * s5) - (m22 * s2) + (m23 * s1);
+
+          adj[2].x = (m10 * c4) - (m11 * c2) + (m13 * c0);
+          adj[2].y = -(m00 * c4) + (m01 * c2) - (m03 * c0);
+          adj[2].z = (m30 * s4) - (m31 * s2) + (m33 * s0);
+          adj[2].w = -(m20 * s4) + (m21 * s2) - (m23 * s0);
+
+          adj[3].x = -(m10 * c3) + (m11 * c1) - (m12 * c0);
+          adj[3].y = (m00 * c3) - (m01 * c1) + (m02 * c0);
+          adj[3].z = -(m30 * s3) + (m31 * s1) - (m32 * s0);
+          adj[3].w = (m20 * s3) - (m21 * s1) + (m22 * s0);
+
+          return adj;
+}
+
 inline Mat4 Mat4::ScaleMatrix(const Vec3 &scale) {
   return {scale.x, 0, 0, 0, 0, scale.y, 0, 0, 0, 0, scale.z, 0, 0, 0, 0, 1.f};
 }
